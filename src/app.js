@@ -4,6 +4,7 @@ const express = require("express");
 // const apiRoutes = require('./routes')
 const authRoutes = require("./routes/authRoutes");
 const storeRoutes = require("./routes/storeRoutes");
+const userRoutes = require("./routes/userRoutes");
 const { errorMiddleware } = require("./middleware/errorMiddleware");
 const { notFoundMiddleware } = require("./middleware/notFoundMiddleware");
 
@@ -28,6 +29,8 @@ app.use((req, res, next) => {
 // app.use('/api/v1/', apiRoutes)
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/stores", storeRoutes);
+app.use("/api/v1/users", userRoutes);
+
 /* ---------------------------------------------- */
 /* --------------- Error Handling --------------- */
 /* ---------------------------------------------- */

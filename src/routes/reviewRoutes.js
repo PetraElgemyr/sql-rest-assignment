@@ -8,3 +8,4 @@ const { createNewReview } = require("../controllers/reviewControllers");
 //updateReviewById (inloggning krävs) /api/v1/reviews/:reviewId
 
 //deleteReviewById (inloggning ) /api/v1/reviews/:reviewId
+module.exports = router;
