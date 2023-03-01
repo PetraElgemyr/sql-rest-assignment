@@ -1,18 +1,20 @@
 const express = require("express");
 const router = express.Router();
 const { isAuthenticated } = require("../middleware/authenticationMiddleware");
-const { deleteUserById } = require("../controllers/userController");
+const {
+  deleteUserById,
+  getAllUsers,
+} = require("../controllers/userController");
 const { getAllReviewsByUserId } = require("../controllers/reviewControllers");
 
-//getUserById
+//getAllUsers (inloggning krävs, samt bara admin kan se alla användare)
+router.get("/", isAuthenticated, getAllUsers);
 
+//getUserById
 
 //deleteUserById
 
 router.delete("/:userId", isAuthenticated, deleteUserById);
-
-//getAllUsers (endast admin)
-//router.get("/users", isAuthenticated, getAllUsers);
 
 //getAllReviewsByUserId
 router.get("/:userId/reviews", getAllReviewsByUserId);

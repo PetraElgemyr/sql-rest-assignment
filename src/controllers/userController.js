@@ -28,5 +28,15 @@ exports.deleteUserById = async (req, res) => {
   return res.sendStatus(204);
 };
 
+exports.getAllUsers = async (req, res) => {
+  if (req.user.role !== userRoles.ADMIN) {
+    throw new UnauthorizedError(
+      "Unauthorized Access! Only admins can do that!"
+    );
+  }
+  if (req.user.role === userRoles.ADMIN) {
+    const [users, metadata] = await sequelize.query(`SELECT * FROM users u`);
 
-
+    return res.json(users);
+  }
+};
