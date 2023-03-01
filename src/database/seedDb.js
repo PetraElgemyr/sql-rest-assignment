@@ -53,11 +53,14 @@ const seedStoresDb = async () => {
     `);
 
     let storesInsertQuery =
-      "INSERT INTO stores (store_name, address, fk_citys_id, fk_users_id) VALUES ('Ica Supermarket Alvikstorg', 'Gustavslundsvägen 22', 1, userid), ('Lidl Göteborg', 'Kungsgatan 16', 3, userid), ('Lidl Medborgarplatsen', 'Folkungagatan 51', 1, userid), ('Coop Hötorget', T-station Hötorget, 1, userid), (), (), (), (), (), ();";
+      "INSERT INTO stores (store_name, address, fk_citys_id, fk_users_id) VALUES ('Ica Supermarket Alvikstorg', 'Gustavslundsvägen 22', 1, userid), ('Lidl Göteborg', 'Kungsgatan 16', 3, userid), ('Lidl Medborgarplatsen', 'Folkungagatan 51', 1, userid), ('Coop Hötorget', 'T-station Hötorget', 1, userid), ('ICA Supermarket Majorna','Karl Johansgatan 21', 3, userid), ('Stora Coop Stadion','Stadiongatan 24', 2, userid), ('Ica Supermarket Hansa',' Stora Nygatan', 2, userid), ('Hemköp Triangeln',' Södra Förstadsgatan 58',2 , userid), ('ICA Supermarket Olskroken',' Redbergsvägen 14', 3, userid), ('Coop Mölndalsvägen','Mölndalsvägen 1', 3, userid);";
+      
+    let usersInsertQuery ="INSERT INTO users(email, password, is_admin) VALUES ('testus@gmail.com','testar123', 'true'), ('ksenia.ivanova@gmail.com', 'password456','false'), ('petra.elgemyr@gmail.com','password789','false'), ('hazan@gmail.com','password123','false')";
 
-    await sequelize.query(storesInsertQuery, {
+
+    /* await sequelize.query(storesInsertQuery, {
       bind: { storesInsertQuery: storesInsertQuery },
-    });
+    }); */
 
     console.log("Database successfully populated with data...");
   } catch (error) {
