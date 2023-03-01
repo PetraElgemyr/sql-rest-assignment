@@ -100,3 +100,9 @@ exports.createNewReviewForStoreById = async (req, res) => {
     .setHeader('Location', `${req.protocol}://${req.headers.host}/api/v1/stores/${newReviewId}`)
     .sendStatus(201)
 };
+
+exports.getAllStores = async (req, res) => {
+  const [stores, metadata] = await sequelize.query('SELECT * FROM stores s ' )
+  return res.json(stores)
+}
+

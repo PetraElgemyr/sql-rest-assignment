@@ -5,11 +5,13 @@ const {
   addNewStore,
   deleteStoreById,
   createNewReviewForStoreById,
+  getAllStores,
 } = require("../controllers/storeControllers");
 
 //getStoreById
 
 //(getAllStores)
+router.get("/", getAllStores);
 
 //addNewStore inloggad för
 //   localhost:3000/api/v1/stores

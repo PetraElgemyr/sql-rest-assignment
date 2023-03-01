@@ -10,5 +10,7 @@ const { deleteUserById } = require("../controllers/userController");
 router.delete("/:userId", isAuthenticated, deleteUserById);
 
 //getAllUsers (endast admin)
+//router.get("/users", isAuthenticated, getAllUsers);
+
 
 module.exports = router;
