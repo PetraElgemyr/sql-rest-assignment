@@ -1,4 +1,5 @@
 const { sequelize } = require("./config");
+const bcrypt = require("bcrypt");
 
 const seedStoresDb = async () => {
   try {
@@ -51,17 +52,22 @@ const seedStoresDb = async () => {
     )
       `);
 
+    const passwordAdmin = "testar123";
+    const passwordKsenia = "password456";
+    const passwordPetra = "password789";
+    const passwordHazan = "password123";
 
-
-      
-
+    const newPasswordAdmin = createHashedPassword(passwordAdmin);
+    const newPasswordKsenia = createHashedPassword(passwordKsenia);
+    const newPasswordPetra = createHashedPassword(passwordPetra);
+    const newPasswordHazan = createHashedPassword(passwordHazan);
 
     await sequelize.query(
       `INSERT INTO users (email, password, is_admin) VALUES 
-      ('testus@gmail.com','testar123', 1), 
-      ('ksenia.ivanova@gmail.com', 'password456',0), 
-      ('petra.elgemyr@gmail.com','password789',0), 
-      ('hazan@gmail.com','password123',0)`
+      ('testus@gmail.com',${newPasswordAdmin}, 1), 
+      ('ksenia.ivanova@gmail.com',${newPasswordKsenia},0), 
+      ('petra.elgemyr@gmail.com',${newPasswordPetra},0), 
+      ('hazan@gmail.com',${newPasswordHazan},0)`
     );
 
     await sequelize.query(
@@ -90,6 +96,13 @@ const seedStoresDb = async () => {
     // End Node process
     process.exit(0);
   }
+};
+
+const createHashedPassword = async (password) => {
+  const salt = await bcrypt.genSalt(10);
+  const hashedpassword = await bcrypt.hash(password, salt);
+
+  return hashedpassword;
 };
 
 seedStoresDb();

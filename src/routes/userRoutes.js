@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { isAuthenticated } = require("../middleware/authenticationMiddleware");
 const {
-  deleteUserById,
   getAllUsers,
+  deleteUserById,
+  getUserById,
 } = require("../controllers/userController");
 const { getAllReviewsByUserId } = require("../controllers/reviewControllers");
 
@@ -11,10 +12,9 @@ const { getAllReviewsByUserId } = require("../controllers/reviewControllers");
 router.get("/", isAuthenticated, getAllUsers);
 
 //getUserById
-router.get("/:userId", isAuthenticated, getAllUsers);
+router.get("/:userId", isAuthenticated, getUserById);
 
 //deleteUserById
-
 router.delete("/:userId", isAuthenticated, deleteUserById);
 
 //getAllReviewsByUserId

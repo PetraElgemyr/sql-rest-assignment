@@ -8,6 +8,25 @@ const { sequelize } = require("../database/config");
 const { UnauthorizedError, NotFoundError } = require("../utils/errors");
 const { QueryTypes } = require("sequelize");
 
+exports.getAllStores = async (req, res) => {
+  const [stores, metadata] = await sequelize.query("SELECT * FROM stores s ");
+  return res.json(stores);
+};
+
+exports.getStoreById = async (req, res) => {
+  const { storeId } = req.params.storeId;
+
+  const [store, metadata] = await sequelize.query(
+    "SELECT * FROM stores s WHERE id = $storeId",
+    {
+      bind: {
+        storeId: storeId,
+      },
+    }
+  );
+  return res.json(store);
+};
+
 exports.addNewStore = async (req, res) => {
   const { storeName, givenAddress, cityId, userId } = req.body;
 
@@ -29,6 +48,31 @@ exports.addNewStore = async (req, res) => {
     .setHeader('Location', `${req.protocol}://${req.headers.host}/api/v1/stores/${newStoreId}`)
     .sendStatus(201)
 };
+
+exports.createNewReviewForStoreById = async (req, res) => {
+  const storeId = req.params.storeId;
+  const { reviewContent, rating, userId } = req.body;
+
+  const [newReviewId] = await sequelize.query(
+    "INSERT INTO reviews (review_content, rating, fk_stores_id, fk_users_id) VALUES ($reviewContent, $rating, $storeId, $userId);",
+    {
+      bind: {
+        reviewContent: reviewContent,
+        rating: rating,
+        storeId: storeId,
+        userId: userId,
+      },
+      type: QueryTypes.INSERT, // returns ID of created row
+    }
+  );
+
+  // prettier-ignore
+  return res
+    .setHeader('Location', `${req.protocol}://${req.headers.host}/api/v1/stores/${newReviewId}`)
+    .sendStatus(201)
+};
+
+exports.updateStoreById = async (req, res) => {};
 
 exports.deleteStoreById = async (req, res) => {
   //   const storeId = req.params.storeId;
@@ -74,58 +118,22 @@ exports.deleteStoreById = async (req, res) => {
   //   return res.sendStatus(204);
 };
 
-/* raw sql text
-INSERT INTO reviews (review_content, rating, fk_stores_id, fk_users_id) VALUES ('Coop: Jag har handlat på Coop i flera år och jag är alltid nöjd med deras utbud och kvalitet på matvaror.', 
-5, 6, 5 ); */
+exports.getAllStoresByCityId = async (req, res) => {
+  const cityId = req.params.cityId;
 
-exports.createNewReviewForStoreById = async (req, res) => {
-  const storeId = req.params.storeId;
-  const { reviewContent, rating, userId } = req.body;
-
-  const [newReviewId] = await sequelize.query(
-    "INSERT INTO reviews (review_content, rating, fk_stores_id, fk_users_id) VALUES ($reviewContent, $rating, $storeId, $userId);",
+  const [stores, metadata] = await sequelize.query(
+    "SELECT * FROM stores s WHERE fk_citys_id = $cityId",
     {
       bind: {
-        reviewContent: reviewContent,
-        rating: rating,
-        storeId: storeId,
-        userId: userId,
+        cityId: cityId,
       },
-      type: QueryTypes.INSERT, // returns ID of created row
+      type: QueryTypes.SELECT, // returns ID of created row
     }
   );
 
-  // prettier-ignore
-  return res
-    .setHeader('Location', `${req.protocol}://${req.headers.host}/api/v1/stores/${newReviewId}`)
-    .sendStatus(201)
-};
-
-exports.getAllStores = async (req, res) => {
-  const [stores, metadata] = await sequelize.query('SELECT * FROM stores s ' )
-  return res.json(stores)
-}
-
-
-exports.getAllStoresByCityId=async (req, res) => {
-  
-  const [stores, metadata] = await sequelize.query('SELECT * FROM stores s ',
-
-  {
-    bind: {
-      reviewContent: reviewContent,
-      rating: rating,
-      storeId: storeId,
-      userId: userId,
-    },
-
-    type: QueryTypes.SELECT, // returns ID of created row
+  if (!stores) {
+    throw new NotFoundError("We could not find any stores in this city");
   }
-  
-  
-  )
 
-  
-  
-  return res.json(stores)
-}
+  return res.json(stores);
+};

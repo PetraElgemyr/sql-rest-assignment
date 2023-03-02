@@ -1,14 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const { isAuthenticated } = require("../middleware/authenticationMiddleware");
-const { createNewReview } = require("../controllers/reviewControllers");
+const {
+  getReviewById,
+  getAllReviewsByUserId,
+  deleteReviewById,
+} = require("../controllers/reviewControllers");
 
+router.get("/:reviewId", isAuthenticated, getReviewById);
 
-//deleteReviewById (inloggning ) /api/v1/reviews/:reviewId
+router.get("/:userId", getAllReviewsByUserId);
+
 router.delete("/:reviewId", isAuthenticated, deleteReviewById);
 
-//getReviewById (för admin)
-router.get("/:reviewId", getReviewById);
-
+//updateReviewById (inloggning krävs) /api/v1/reviews/:reviewId
 
 module.exports = router;

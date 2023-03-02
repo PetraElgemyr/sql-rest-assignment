@@ -3,6 +3,23 @@ const { NotFoundError, UnauthorizedError } = require("../utils/errors");
 const { sequelize } = require("../database/config");
 const { QueryTypes } = require("sequelize");
 
+exports.getAllUsers = async (req, res) => {
+  if (req.user.role !== userRoles.ADMIN) {
+    throw new UnauthorizedError(
+      "Unauthorized Access! Only admins can do that!"
+    );
+  }
+  if (req.user.role === userRoles.ADMIN) {
+    const [users, metadata] = await sequelize.query(`SELECT * FROM users u`);
+
+    return res.json(users);
+  }
+};
+
+exports.getUserById = async (req, res) => {
+  console.log("hej");
+};
+
 exports.deleteUserById = async (req, res) => {
   // Grab the user id and place in local variable
   const givenUserId = req.params.userId;
@@ -26,17 +43,4 @@ exports.deleteUserById = async (req, res) => {
 
   // Send back user info
   return res.sendStatus(204);
-};
-
-exports.getAllUsers = async (req, res) => {
-  if (req.user.role !== userRoles.ADMIN) {
-    throw new UnauthorizedError(
-      "Unauthorized Access! Only admins can do that!"
-    );
-  }
-  if (req.user.role === userRoles.ADMIN) {
-    const [users, metadata] = await sequelize.query(`SELECT * FROM users u`);
-
-    return res.json(users);
-  }
 };
