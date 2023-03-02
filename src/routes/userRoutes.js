@@ -11,6 +11,7 @@ const { getAllReviewsByUserId } = require("../controllers/reviewControllers");
 router.get("/", isAuthenticated, getAllUsers);
 
 //getUserById
+router.get("/:userId", isAuthenticated, getAllUsers);
 
 //deleteUserById
 

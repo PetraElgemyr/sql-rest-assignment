@@ -6,6 +6,7 @@ const authRoutes = require("./routes/authRoutes");
 const storeRoutes = require("./routes/storeRoutes");
 const userRoutes = require("./routes/userRoutes");
 const cityRoutes = require("./routes/cityRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
 const { errorMiddleware } = require("./middleware/errorMiddleware");
 const { notFoundMiddleware } = require("./middleware/notFoundMiddleware");
 
@@ -32,6 +33,8 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/stores", storeRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/citys", cityRoutes);
+app.use("/api/v1/reviews", reviewRoutes);
+
 
 
 /* ---------------------------------------------- */
