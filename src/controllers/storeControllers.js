@@ -106,3 +106,26 @@ exports.getAllStores = async (req, res) => {
   return res.json(stores)
 }
 
+
+exports.getAllStoresByCityId=async (req, res) => {
+  
+  const [stores, metadata] = await sequelize.query('SELECT * FROM stores s ',
+
+  {
+    bind: {
+      reviewContent: reviewContent,
+      rating: rating,
+      storeId: storeId,
+      userId: userId,
+    },
+
+    type: QueryTypes.SELECT, // returns ID of created row
+  }
+  
+  
+  )
+
+  
+  
+  return res.json(stores)
+}

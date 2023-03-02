@@ -51,6 +51,11 @@ const seedStoresDb = async () => {
     )
       `);
 
+
+
+      
+
+
     await sequelize.query(
       `INSERT INTO users (email, password, is_admin) VALUES 
       ('testus@gmail.com','testar123', 1), 

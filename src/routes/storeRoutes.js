@@ -8,6 +8,7 @@ const {
   getAllStores,
 } = require("../controllers/storeControllers");
 
+
 //getStoreById
 
 //(getAllStores)
@@ -26,5 +27,7 @@ router.post("/:storeId/reviews", createNewReviewForStoreById);
 //deleteStoreById ägare för/admin
 // localhost:3000/api/v1/stores/:storeId
 router.delete("/:storeId", deleteStoreById);
+
+
 
 module.exports = router;
