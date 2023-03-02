@@ -30,3 +30,27 @@ return res.json(reviews)
   
 }
 
+exports.deleteReviewById = async (req, res) => {
+
+      // Grab the review id and place in local variable
+
+    const givenReviewId = req.params.rewiewId
+
+
+    // Delete the review from the database
+
+    const [reviews, metadata] = await sequelize.query("DELETE FROM reviews WHERE id = $givenReviewId RETURNING * ",
+    {
+    bind: { givenReviewId },
+    }
+    );
+
+    // Not found error (ok since since route is authenticated)
+  if (!results || !results[0])
+  throw new NotFoundError("That review does not exist");
+
+// Send back review info
+return res.sendStatus(204);
+};
+
+
