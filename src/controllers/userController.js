@@ -17,8 +17,24 @@ exports.getAllUsers = async (req, res) => {
 };
 
 exports.getUserById = async (req, res) => {
-  console.log("hej");
+  const userId = req.params.userId;
+
+  const [users, metadata] = await sequelize.query(
+    "SELECT id, email, password FROM users u WHERE id = $userId",
+    {
+      bind: { userId: userId},
+      type: QueryTypes.SELECT,
+
+    });
+
+    if (!users) {
+      throw new NotFoundError("We could not find this user");
+    }
+    return res.json(users)
+
+
 };
+
 
 exports.deleteUserById = async (req, res) => {
   // Grab the user id and place in local variable
