@@ -11,6 +11,7 @@ const {
   BadRequestError,
 } = require("../utils/errors");
 const { QueryTypes } = require("sequelize");
+const { query } = require("express");
 
 exports.getAllStores = async (req, res) => {
   const [stores, metadata] = await sequelize.query("SELECT * FROM stores s ");
@@ -89,45 +90,84 @@ exports.deleteStoreById = async (req, res) => {
   const storeId = req.params.storeId;
   const loggedInUserId = req.user.userId;
 
-  //Sequal raw:     DELETE FROM stores WHERE id =  storeId ;
-
-  const [stores, metadata] = await sequelize.query(
-    "SELECT id FROM stores s WHERE fk_users_id = $loggedInUserId",
+  const storeExists = await sequelize.query(
+    "SELECT * FROM stores s WHERE id = $storeId",
     {
       bind: {
-        loggedInUserId: storeId,
+        storeId: storeId,
       },
       type: QueryTypes.SELECT,
     }
   );
 
-  if (!stores && req.user.role !== userRoles.admin) {
-    throw new UnauthorizedError(
-      "You don't own any stores and you are not an admin, so you can't delete stores"
-    );
+  if (!storeExists) {
+    throw new NotFoundError("We could not find the store you are looking for");
   }
 
-  //om det finns stores på användaren
-  if (stores) {
-    const [deleteStore, metadata] = await sequelize.query(
-      "DELETE FROM stores WHERE id =  $storeId",
-      {
-        bind: {
-          storeId,
-        },
-        type: QueryTypes.DELETE,
-      }
-    );
+  //kolla om den inloggade personen äger den utvalda butiken
+  const [ownedStore, metadata] = await sequelize.query(
+    "SELECT * FROM stores s WHERE id =  $storeId  AND fk_users_id = $loggedInUserId LIMIT 1",
+    {
+      bind: {
+        storeId: storeId,
+        loggedInUserId: loggedInUserId,
+      },
+      type: QueryTypes.SELECT,
+    }
+  );
 
+  //om butiken inte är din, returnera 404 not found
+  if (!ownedStore) {
+    console.log("Du äger inga butiker med det id:t");
+    return res.sendStatus(404);
+  }
+
+  //om butiken med storeId faktiskt ägs av den som är inloggad, då kan vi ta bort den butiken
+  if (ownedStore) {
+    console.log("Du äger denna butik med det anvigna id:t : ", ownedStore);
+
+    //ta bort butik, vi vet att den inloggade står som ägare för butiken
+    await sequelize.query("DELETE FROM stores WHERE id =  $storeId", {
+      bind: {
+        storeId,
+      },
+      type: QueryTypes.DELETE,
+    });
+
+    //ta bort alla recensioner sammankopplade till storeId:t och butiken
     await sequelize.query("DELETE FROM reviews WHERE id = $storeId ", {
       bind: {
         storeId,
       },
       type: QueryTypes.DELETE,
     });
+
+    return res.sendStatus(204);
   }
 
-  return res.sendStatus(204);
+  /**************************************
+  //(SELECT * FROM stores WHERE fk_users_id = $loggedInUserId)
+  //admin
+  if (req.user.role === userRoles.ADMIN) {
+    //ta bort store från tabellen
+    await sequelize.query("DELETE FROM stores WHERE id =  $storeId", {
+      bind: {
+        storeId,
+      },
+      type: QueryTypes.DELETE,
+    });
+
+    //ta bort alla recensioner sammankopplade till storeId:t
+    await sequelize.query("DELETE FROM reviews WHERE id = $storeId ", {
+      bind: {
+        storeId,
+      },
+      type: QueryTypes.DELETE,
+    });
+
+    return res.sendStatus(204);
+  }
+**************************/
 };
 
 exports.getAllStoresByCityId = async (req, res) => {

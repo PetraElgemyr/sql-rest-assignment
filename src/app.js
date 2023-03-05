@@ -1,6 +1,7 @@
 require("dotenv").config();
 require("express-async-errors");
 const express = require("express");
+const cors = require("cors");
 // const apiRoutes = require('./routes')
 const authRoutes = require("./routes/authRoutes");
 const storeRoutes = require("./routes/storeRoutes");
@@ -19,7 +20,12 @@ const app = express();
 /* ----------------- Middleware ----------------- */
 /* ---------------------------------------------- */
 app.use(express.json());
-
+app.use(
+  cors({
+    origin: ["http://localhost:3000"],
+    methods: ["GET", "PUT", "PATCH", "DELETE", "POST"],
+  })
+);
 app.use((req, res, next) => {
   console.log(`Processing ${req.method} request to ${req.path}`);
   next();
