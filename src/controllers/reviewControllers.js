@@ -33,25 +33,47 @@ exports.getReviewById = async (req, res) => {
 exports.deleteReviewById = async (req, res) => {
   // Grab the review id and place in local variable
   const givenReviewId = req.params.reviewId;
-
-  // Delete the review from the database
+  // Grab the logged in user id and place in local variable
+  const loggedInUserId = req.user.userId;
+  
   const [review, metadata] = await sequelize.query(
-    "DELETE FROM reviews WHERE id = $givenReviewId ",
+    "SELECT * FROM reviews WHERE id = $givenReviewId",
     {
-      bind: { givenReviewId: givenReviewId },
+      bind: { givenReviewId },
+      type: QueryTypes.SELECT,
     }
   );
 
-  // Not found error (ok since since route is authenticated)
-  if (!review) {
-    throw new NotFoundError(
-      "That review does not exist. You can't delete something that does not exist!"
-    );
+ 
+  
+  //check if review exists
+  if (!review) throw new NotFoundError("There is no such review")
+  
+  // Check if review belongs to logged-in user or user is an admin
+  if (review.fk_users_id !== loggedInUserId && req.user.role !== userRoles.ADMIN) {
+    throw new UnauthorizedError("You can't delete this review!");
   }
 
-  // Send back review info
+  
+  
+
+  // Delete the review from the database
+  const [deleteReview, deleteMetadata] = await sequelize.query(
+    "DELETE FROM reviews WHERE id = $givenReviewId",
+    
+    {
+      bind: {
+        givenReviewId
+      },
+      type: QueryTypes.DELETE,
+    }
+  );
+
+   
   return res.sendStatus(204);
+ 
 };
+
 
 exports.getAllReviewsByUserId = async (req, res) => {
   const userId = req.params.userId;
