@@ -37,7 +37,7 @@ exports.deleteReviewById = async (req, res) => {
   const loggedInUserId = req.user.userId;
   
   const [review, metadata] = await sequelize.query(
-    "SELECT id FROM reviews WHERE id = $givenReviewId",
+    "SELECT * FROM reviews WHERE id = $givenReviewId",
     {
       bind: { givenReviewId },
       type: QueryTypes.SELECT,
@@ -47,15 +47,16 @@ exports.deleteReviewById = async (req, res) => {
    
   //check if review exists
   if (!review) throw new NotFoundError("There is no such review")
+ 
   
-  // Check if review belongs to logged-in user or user is an admin
-  if (review.fk_users_id !== loggedInUserId || req.user.role !== userRoles.ADMIN) {
+  // Check if review belongs to logged-in user 
+  if (review.fk_users_id !== loggedInUserId && req.user.role !== userRoles.ADMIN) {
     throw new UnauthorizedError("You can't delete this review!");
   }
 
    
   // Delete the review from the database
-  const [deleteReview, deleteMetadata] = await sequelize.query(
+  await sequelize.query(
     "DELETE FROM reviews WHERE id = $givenReviewId",
     
     {
