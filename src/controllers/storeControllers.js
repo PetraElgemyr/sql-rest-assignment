@@ -63,7 +63,8 @@ exports.addNewStore = async (req, res) => {
 
 exports.createNewReviewForStoreById = async (req, res) => {
   const storeId = req.params.storeId;
-  const { reviewContent, rating, userId } = req.body;
+  const { reviewContent, rating } = req.body;
+  const userId = req.user.userId;
 
   const [newReviewId] = await sequelize.query(
     "INSERT INTO reviews (review_content, rating, fk_stores_id, fk_users_id) VALUES ($reviewContent, $rating, $storeId, $userId);",

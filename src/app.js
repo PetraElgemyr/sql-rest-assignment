@@ -2,6 +2,9 @@ require("dotenv").config();
 require("express-async-errors");
 const express = require("express");
 const cors = require("cors");
+const xss = require("xss-clean");
+const { rateLimit } = require("express.rate.limit");
+const { default: helmet } = require("helmet");
 // const apiRoutes = require('./routes')
 const authRoutes = require("./routes/authRoutes");
 const storeRoutes = require("./routes/storeRoutes");
@@ -20,12 +23,23 @@ const app = express();
 /* ----------------- Middleware ----------------- */
 /* ---------------------------------------------- */
 app.use(express.json());
+app.use(xss());
+app.use(helmet());
+
 app.use(
   cors({
     origin: ["http://localhost:3000"],
     methods: ["GET", "PUT", "PATCH", "DELETE", "POST"],
   })
 );
+
+app.use(
+  rateLimiter({
+    windowsMs: 15 * 60 * 1000,
+    max: 80,
+  })
+);
+
 app.use((req, res, next) => {
   console.log(`Processing ${req.method} request to ${req.path}`);
   next();
