@@ -94,8 +94,8 @@ exports.deleteStoreById = async (req, res) => {
   const storeId = req.params.storeId;
   const loggedInUserId = req.user.userId;
 
-  const storeExists = await sequelize.query(
-    "SELECT * FROM stores s WHERE id = $storeId",
+  const [store, metadata] = await sequelize.query(
+    "SELECT * FROM stores s WHERE id = $storeId LIMIT 1",
     {
       bind: {
         storeId: storeId,
@@ -104,74 +104,102 @@ exports.deleteStoreById = async (req, res) => {
     }
   );
 
-  if (!storeExists) {
+  if (!store) {
     throw new NotFoundError("We could not find the store you are looking for");
   }
 
-  //kolla om den inloggade personen äger den utvalda butiken
-  const [ownedStore, metadata] = await sequelize.query(
-    "SELECT * FROM stores s WHERE id =  $storeId  AND fk_users_id = $loggedInUserId LIMIT 1",
-    {
-      bind: {
-        storeId: storeId,
-        loggedInUserId: loggedInUserId,
-      },
-      type: QueryTypes.SELECT,
-    }
-  );
-
-  //om butiken inte är din, returnera 404 not found
-  if (!ownedStore) {
-    console.log("Du äger inga butiker med det id:t");
-    return res.sendStatus(404);
+  // //om både owner=false och admin=false
+  if (
+    store.fk_users_id !== loggedInUserId &&
+    req.user.role !== userRoles.ADMIN
+  ) {
+    throw new UnauthorizedError(
+      "You can't delete this store! You don't own the store and are no admin."
+    );
   }
 
-  //om butiken med storeId faktiskt ägs av den som är inloggad, då kan vi ta bort den butiken
-  if (ownedStore) {
-    console.log("Du äger denna butik med det anvigna id:t : ", ownedStore);
+  await sequelize.query("DELETE FROM stores WHERE id = $storeId;", {
+    bind: {
+      storeId,
+    },
+    type: QueryTypes.DELETE,
+  });
 
-    //ta bort butik, vi vet att den inloggade står som ägare för butiken
-    await sequelize.query("DELETE FROM stores WHERE id =  $storeId", {
-      bind: {
-        storeId,
-      },
-      type: QueryTypes.DELETE,
-    });
+  // ta bort alla recensioner sammankopplade till storeId:t och butiken
+  await sequelize.query("DELETE FROM reviews WHERE fk_stores_id = $storeId ", {
+    bind: {
+      storeId,
+    },
+    type: QueryTypes.DELETE,
+  });
 
-    //ta bort alla recensioner sammankopplade till storeId:t och butiken
-    await sequelize.query("DELETE FROM reviews WHERE id = $storeId ", {
-      bind: {
-        storeId,
-      },
-      type: QueryTypes.DELETE,
-    });
-
-    return res.sendStatus(204);
-  }
-
+  return res.sendStatus(204);
+  /*************************************** */
   /**************************************
-  //(SELECT * FROM stores WHERE fk_users_id = $loggedInUserId)
-  //admin
-  if (req.user.role === userRoles.ADMIN) {
-    //ta bort store från tabellen
-    await sequelize.query("DELETE FROM stores WHERE id =  $storeId", {
-      bind: {
-        storeId,
-      },
-      type: QueryTypes.DELETE,
-    });
-
-    //ta bort alla recensioner sammankopplade till storeId:t
-    await sequelize.query("DELETE FROM reviews WHERE id = $storeId ", {
-      bind: {
-        storeId,
-      },
-      type: QueryTypes.DELETE,
-    });
-
-    return res.sendStatus(204);
-  }
+ 
 **************************/
+  //kolla om den inloggade personen äger den utvalda butiken
+  // const [ownedStore, metadata] = await sequelize.query(
+  //   "SELECT * FROM stores s WHERE id =  $storeId  AND fk_users_id = $loggedInUserId LIMIT 1",
+  //   {
+  //     bind: {
+  //       storeId: storeId,
+  //       loggedInUserId: loggedInUserId,
+  //     },
+  //     type: QueryTypes.SELECT,
+  //   }
+  // );
+
+  // // //om butiken inte är din, returnera 404 not found
+  // if (!ownedStore) {
+  //   throw NotFoundError("Cannot find the store you are looking for and own");
+  // }
+
+  // // //om butiken med storeId faktiskt ägs av den som är inloggad, då kan vi ta bort den butiken
+  // if (ownedStore) {
+  //   await sequelize.query("DELETE FROM stores WHERE id =  $storeId", {
+  //     bind: {
+  //       storeId,
+  //     },
+  //     type: QueryTypes.DELETE,
+  //   });
+
+  //   //ta bort alla recensioner sammankopplade till storeId:t och butiken
+  //   await sequelize.query(
+  //     "DELETE FROM reviews WHERE fk_stores_id = $storeId ",
+  //     {
+  //       bind: {
+  //         storeId,
+  //       },
+  //       type: QueryTypes.DELETE,
+  //     }
+  //   );
+  // }
+
+  /********************************************'' */
+
+  // if (
+  //   store.fk_users_id === loggedInUserId ||
+  //   req.user.role === userRoles.ADMIN
+  // ) {
+  //   await sequelize.query("DELETE FROM stores WHERE id =  $storeId", {
+  //     bind: {
+  //       storeId,
+  //     },
+  //     type: QueryTypes.DELETE,
+  //   });
+
+  //   //ta bort alla recensioner sammankopplade till storeId:t och butiken
+  //   await sequelize.query(
+  //     "DELETE FROM reviews WHERE fk_stores_id = $storeId ",
+  //     {
+  //       bind: {
+  //         storeId,
+  //       },
+  //       type: QueryTypes.DELETE,
+  //     }
+  //   );
+  // }
 };
 
 exports.getAllStoresByCityId = async (req, res) => {

@@ -3,7 +3,7 @@ require("express-async-errors");
 const express = require("express");
 const cors = require("cors");
 const xss = require("xss-clean");
-const { rateLimit } = require("express.rate.limit");
+// const { rateLimit } = require("express.rate.limit");
 const { default: helmet } = require("helmet");
 // const apiRoutes = require('./routes')
 const authRoutes = require("./routes/authRoutes");
@@ -33,12 +33,12 @@ app.use(
   })
 );
 
-app.use(
-  rateLimit({
-    windowsMs: 15 * 60 * 1000,
-    max: 80,
-  })
-);
+// app.use(
+//   rateLimit({
+//     windowsMs: 15 * 60 * 1000,
+//     max: 80,
+//   })
+// );
 
 app.use((req, res, next) => {
   console.log(`Processing ${req.method} request to ${req.path}`);
