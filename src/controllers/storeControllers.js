@@ -86,23 +86,48 @@ exports.createNewReviewForStoreById = async (req, res) => {
 };
 
 exports.updateStoreById = async (req, res) => {
-  //uppdatera adress, namn, cityid
-  //endast admin och ägare
   const storeId = req.params.storeId;
+  const loggedInUserId = req.user.userId;
   const { name, address, description, cityId } = req.body;
 
-  const [newStoreId] = await sequelize.query(
-    "INSERT INTO stores (store_name, address, fk_citys_id, fk_users_id) VALUES ($storeName, $givenAddress, $cityId, $userId);",
+  const [storeToUpdate, storeMetadata] = await sequelize.query(
+    "SELECT * FROM stores WHERE id = $storeId",
     {
       bind: {
-        storeName: storeName,
-        givenAddress: givenAddress,
-        cityId: cityId,
-        userId: req.user.userId,
+        storeId,
       },
-      type: QueryTypes.INSERT, // returns ID of created row
+      type: QueryTypes.SELECT,
     }
   );
+
+  if (!storeToUpdate) {
+    throw new NotFoundError("We can't find the store you are looking for");
+  }
+
+  if (
+    storeToUpdate.fk_users_id !== loggedInUserId &&
+    req.user.role !== userRoles.ADMIN
+  ) {
+    throw new UnauthorizedError(
+      "Sorry, you don't have access to update this store's info"
+    );
+  }
+
+  const [updateStore, metadata] = await sequelize.query(
+    "UPDATE stores SET store_name = $name, address = $address, fk_citys_id = $cityId, description = $description WHERE id = $storeId RETURNING *;",
+    {
+      bind: {
+        storeId: storeId,
+        name: name,
+        address: address,
+        cityId: cityId,
+        description: description,
+      },
+      type: QueryTypes.UPDATE,
+    }
+  );
+  return res.json(updateStore);
+  // }
 };
 
 exports.deleteStoreById = async (req, res) => {

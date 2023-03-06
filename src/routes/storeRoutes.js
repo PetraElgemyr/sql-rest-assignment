@@ -24,7 +24,7 @@ router.post("/", isAuthenticated, addNewStore);
 router.post("/:storeId/reviews", isAuthenticated, createNewReviewForStoreById);
 
 //updateStoreById ägare/admin
-router.put("/", isAuthenticated, updateStoreById);
+router.put("/:storeId", isAuthenticated, updateStoreById);
 
 //deleteStoreById ägare /admin
 router.delete("/:storeId", isAuthenticated, deleteStoreById);
