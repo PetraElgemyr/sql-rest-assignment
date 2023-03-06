@@ -34,7 +34,7 @@ app.use(
 );
 
 app.use(
-  rateLimiter({
+  rateLimit({
     windowsMs: 15 * 60 * 1000,
     max: 80,
   })
