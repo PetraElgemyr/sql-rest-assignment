@@ -85,7 +85,10 @@ exports.createNewReviewForStoreById = async (req, res) => {
     .sendStatus(201)
 };
 
-exports.updateStoreById = async (req, res) => {};
+exports.updateStoreById = async (req, res) => {
+  //uppdatera adress, namn, cityid
+  //endast admin och ägare
+};
 
 exports.deleteStoreById = async (req, res) => {
   const storeId = req.params.storeId;
