@@ -11,7 +11,7 @@ const {
   BadRequestError,
 } = require("../utils/errors");
 const { QueryTypes } = require("sequelize");
-const { query } = require("express");
+const jwt = require("jsonwebtoken");
 
 exports.getAllStores = async (req, res) => {
   const [stores, metadata] = await sequelize.query("SELECT * FROM stores s ");
@@ -88,6 +88,21 @@ exports.createNewReviewForStoreById = async (req, res) => {
 exports.updateStoreById = async (req, res) => {
   //uppdatera adress, namn, cityid
   //endast admin och ägare
+  const storeId = req.params.storeId;
+  const { name, address, description, cityId } = req.body;
+
+  const [newStoreId] = await sequelize.query(
+    "INSERT INTO stores (store_name, address, fk_citys_id, fk_users_id) VALUES ($storeName, $givenAddress, $cityId, $userId);",
+    {
+      bind: {
+        storeName: storeName,
+        givenAddress: givenAddress,
+        cityId: cityId,
+        userId: req.user.userId,
+      },
+      type: QueryTypes.INSERT, // returns ID of created row
+    }
+  );
 };
 
 exports.deleteStoreById = async (req, res) => {
@@ -116,90 +131,28 @@ exports.deleteStoreById = async (req, res) => {
     throw new UnauthorizedError(
       "You can't delete this store! You don't own the store and are no admin."
     );
+  } else {
+    await sequelize.query(
+      "DELETE FROM reviews WHERE fk_stores_id = $storeId RETURNING *;",
+      {
+        bind: {
+          storeId,
+        },
+        type: QueryTypes.DELETE,
+      }
+    );
+
+    await sequelize.query(
+      "DELETE FROM stores WHERE id = $storeId RETURNING *;",
+      {
+        bind: {
+          storeId,
+        },
+        type: QueryTypes.DELETE,
+      }
+    );
+    return res.sendStatus(204);
   }
-
-  await sequelize.query("DELETE FROM stores WHERE id = $storeId;", {
-    bind: {
-      storeId,
-    },
-    type: QueryTypes.DELETE,
-  });
-
-  // ta bort alla recensioner sammankopplade till storeId:t och butiken
-  await sequelize.query("DELETE FROM reviews WHERE fk_stores_id = $storeId ", {
-    bind: {
-      storeId,
-    },
-    type: QueryTypes.DELETE,
-  });
-
-  return res.sendStatus(204);
-  /*************************************** */
-  /**************************************
- 
-**************************/
-  //kolla om den inloggade personen äger den utvalda butiken
-  // const [ownedStore, metadata] = await sequelize.query(
-  //   "SELECT * FROM stores s WHERE id =  $storeId  AND fk_users_id = $loggedInUserId LIMIT 1",
-  //   {
-  //     bind: {
-  //       storeId: storeId,
-  //       loggedInUserId: loggedInUserId,
-  //     },
-  //     type: QueryTypes.SELECT,
-  //   }
-  // );
-
-  // // //om butiken inte är din, returnera 404 not found
-  // if (!ownedStore) {
-  //   throw NotFoundError("Cannot find the store you are looking for and own");
-  // }
-
-  // // //om butiken med storeId faktiskt ägs av den som är inloggad, då kan vi ta bort den butiken
-  // if (ownedStore) {
-  //   await sequelize.query("DELETE FROM stores WHERE id =  $storeId", {
-  //     bind: {
-  //       storeId,
-  //     },
-  //     type: QueryTypes.DELETE,
-  //   });
-
-  //   //ta bort alla recensioner sammankopplade till storeId:t och butiken
-  //   await sequelize.query(
-  //     "DELETE FROM reviews WHERE fk_stores_id = $storeId ",
-  //     {
-  //       bind: {
-  //         storeId,
-  //       },
-  //       type: QueryTypes.DELETE,
-  //     }
-  //   );
-  // }
-
-  /********************************************'' */
-
-  // if (
-  //   store.fk_users_id === loggedInUserId ||
-  //   req.user.role === userRoles.ADMIN
-  // ) {
-  //   await sequelize.query("DELETE FROM stores WHERE id =  $storeId", {
-  //     bind: {
-  //       storeId,
-  //     },
-  //     type: QueryTypes.DELETE,
-  //   });
-
-  //   //ta bort alla recensioner sammankopplade till storeId:t och butiken
-  //   await sequelize.query(
-  //     "DELETE FROM reviews WHERE fk_stores_id = $storeId ",
-  //     {
-  //       bind: {
-  //         storeId,
-  //       },
-  //       type: QueryTypes.DELETE,
-  //     }
-  //   );
-  // }
 };
 
 exports.getAllStoresByCityId = async (req, res) => {
