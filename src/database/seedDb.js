@@ -31,13 +31,13 @@ const seedStoresDb = async () => {
     CREATE TABLE IF NOT EXISTS stores (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         store_name TEXT NOT NULL,
-        adress TEXT NOT NULL,
+        address TEXT NOT NULL,
+        description TEXT NOT NULL,
         fk_citys_id INTEGER NOT NULL, 
         fk_users_id INTEGER NOT NULL,
         FOREIGN KEY(fk_citys_id) REFERENCES citys(id),
-        FOREIGN KEY(fk_users_id) REFERENCES users(id),
-        description TEXT NOT NULL 
-    )
+        FOREIGN KEY(fk_users_id) REFERENCES users(id)
+        )
       `);
 
     // Create reviews table
@@ -87,18 +87,18 @@ const seedStoresDb = async () => {
     );
 
     await sequelize.query(`INSERT INTO stores 
-    (store_name, address, fk_citys_id, fk_users_id, description) 
+    (store_name, address, description, fk_citys_id, fk_users_id ) 
     VALUES 
-    ('Ica Supermarket Alvikstorg', 'Gustavslundsvägen 22', (SELECT id FROM citys c WHERE city_name = 'Stockholm'), (SELECT id FROM users WHERE email = 'hazan@gmail.com'), 'Vardag eller fest? Vi har det du behöver. I butiken fyller vi varje dag på med nya färskvaror, frukt och grönt, mejeriprodukter och annat gott som förgyller din matvardag. I vår charkavdelning hittar du ostar, salami och skinkor för picknick, mys eller fest. Vi ses i butiken!'),
-    ('Lidl Göteborg', 'Kungsgatan 16', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'ksenia.ivanova@gmail.com'), 'Vi pressar ner priserna utan att kvalitén ska ta stryk. För oss är det viktigt att bidra till hållbar och ansvarsfull odling av råvaror. Därför satsar vi bland annat på vårt ekologiska sortiment som fortsätter att växa. Välkommen in till oss!'),
-    ('Lidl Medborgarplatsen', 'Folkungagatan 51', (SELECT id FROM citys c WHERE city_name = 'Stockholm'), (SELECT id FROM users WHERE email = 'hazan@gmail.com'),'En stor butik på liten yta mitt på Södermalm. Lidl Medborgarplatsen strävar efter att vara ett av de billigaste alternativen på marknaden utan att förlora kvalitet.'), 
-    ('Coop Hötorget', 'T-station Hötorget', (SELECT id FROM citys c WHERE city_name = 'Stockholm'),(SELECT id FROM users WHERE email = 'hazan@gmail.com'), 'Coop Hötorget har stort utbud av allt som kan behövas. Mitt i Stockholm ligger vi med fokus på att det ska vara enkelt att snabbt handla hos oss påväg hem från jobbet utan något krångel. Välkommen in hos oss!'), 
-    ('ICA Supermarket Majorna', 'Karl Johansgatan 21', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com'), 'Ica är butiken där du kan handla mat av högsta kvalitet till bästa pris. Vi har flera hundra butiker i Sverige där svenska och ekologiska produkter samsas med utvalda utländska delikatesser.'),
-    ('Stora Coop Stadion', 'Stadiongatan 24', (SELECT id FROM citys c WHERE city_name = 'Malmö'), (SELECT id FROM users WHERE email = 'hazan@gmail.com'),'Coop har alltid fokus på hållbar ekologisk mat till ett bra pris, utan att minska kvaliten.'),
-    ('Ica Supermarket Hansa', 'Stora Nygatan', (SELECT id FROM citys c WHERE city_name = 'Malmö'), (SELECT id FROM users WHERE email = 'ksenia.ivanova@gmail.com'),'Ica Hansa, närbutik lagom nära och enkelt att hitta hit.'),
-    ('Hemköp Triangeln', 'Södra Förstadsgatan 58',(SELECT id FROM citys c WHERE city_name = 'Malmö') , (SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com'),'Mitt i köpcentrumet ligger vi. Hjärtat av Malmö, välkommen hit!'), 
-    ('ICA Supermarket Olskroken', 'Redbergsvägen 14', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com'),'Ica Olskroken finns när du behöver och där du behöver. Vardag eller helg så har vi det du söker.'),
-    ('Coop Mölndalsvägen', 'Mölndalsvägen 1', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'ksenia.ivanova@gmail.com'), 'En välsorterad butik med matbar och deli.')`);
+    ('Ica Supermarket Alvikstorg', 'Gustavslundsvägen 22', 'Vardag eller fest? Vi har det du behöver. I butiken fyller vi varje dag på med nya färskvaror, frukt och grönt, mejeriprodukter och annat gott som förgyller din matvardag. I vår charkavdelning hittar du ostar, salami och skinkor för picknick, mys eller fest. Vi ses i butiken!', (SELECT id FROM citys c WHERE city_name = 'Stockholm'), (SELECT id FROM users WHERE email = 'hazan@gmail.com')),
+    ('Lidl Göteborg', 'Kungsgatan 16', 'Vi pressar ner priserna utan att kvalitén ska ta stryk. För oss är det viktigt att bidra till hållbar och ansvarsfull odling av råvaror. Därför satsar vi bland annat på vårt ekologiska sortiment som fortsätter att växa. Välkommen in till oss!', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'ksenia.ivanova@gmail.com')),
+    ('Lidl Medborgarplatsen', 'Folkungagatan 51', 'En stor butik på liten yta mitt på Södermalm. Lidl Medborgarplatsen strävar efter att vara ett av de billigaste alternativen på marknaden utan att förlora kvalitet.', (SELECT id FROM citys c WHERE city_name = 'Stockholm'), (SELECT id FROM users WHERE email = 'hazan@gmail.com')), 
+    ('Coop Hötorget', 'T-station Hötorget', 'Coop Hötorget har stort utbud av allt som kan behövas. Mitt i Stockholm ligger vi med fokus på att det ska vara enkelt att snabbt handla hos oss påväg hem från jobbet utan något krångel. Välkommen in hos oss!', (SELECT id FROM citys c WHERE city_name = 'Stockholm'),(SELECT id FROM users WHERE email = 'hazan@gmail.com')), 
+    ('ICA Supermarket Majorna', 'Karl Johansgatan 21', 'Ica är butiken där du kan handla mat av högsta kvalitet till bästa pris. Vi har flera hundra butiker i Sverige där svenska och ekologiska produkter samsas med utvalda utländska delikatesser.', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com')),
+    ('Stora Coop Stadion', 'Stadiongatan 24', 'Coop har alltid fokus på hållbar ekologisk mat till ett bra pris, utan att minska kvaliten.', (SELECT id FROM citys c WHERE city_name = 'Malmö'), (SELECT id FROM users WHERE email = 'hazan@gmail.com')),
+    ('Ica Supermarket Hansa', 'Stora Nygatan','Ica Hansa, närbutik lagom nära och enkelt att hitta hit.', (SELECT id FROM citys c WHERE city_name = 'Malmö'), (SELECT id FROM users WHERE email = 'ksenia.ivanova@gmail.com')),
+    ('Hemköp Triangeln', 'Södra Förstadsgatan 58','Mitt i köpcentrumet ligger vi. Hjärtat av Malmö, välkommen hit!', (SELECT id FROM citys c WHERE city_name = 'Malmö') , (SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com')), 
+    ('ICA Supermarket Olskroken', 'Redbergsvägen 14','Ica Olskroken finns när du behöver och där du behöver. Vardag eller helg så har vi det du söker.', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com')),
+    ('Coop Mölndalsvägen', 'Mölndalsvägen 1', 'En välsorterad butik med matbar och deli.'), (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'ksenia.ivanova@gmail.com')`);
 
     await sequelize.query(`INSERT INTO reviews (review_content, rating, fk_stores_id, fk_users_id) VALUES 
     ('Coop är en av de större matbutikerna och har ett stort utbud av matvaror. Jag gillar deras sortiment av ekologiska och hälsosamma produkter, och också deras fokus på hållbarhet.', 4, (SELECT id FROM stores WHERE store_name = 'Coop Hötorget'),(SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com')),
