@@ -10,7 +10,7 @@ Express server
 ### Preparations
 
 DbDiagram
-![Alt text]('./Assignment.png', "DbDiagram")
+![DbDiagram](./Assignment.png, "DbDiagram")
 
 ### Users
 
