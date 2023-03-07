@@ -4,11 +4,10 @@ const bcrypt = require("bcrypt");
 const seedStoresDb = async () => {
   try {
     // Drop tables if exist
-
-    await sequelize.query(`DROP TABLE IF EXISTS citys;`);
-    await sequelize.query(`DROP TABLE IF EXISTS users;`);
     await sequelize.query(`DROP TABLE IF EXISTS reviews;`);
     await sequelize.query(`DROP TABLE IF EXISTS stores;`);
+    await sequelize.query(`DROP TABLE IF EXISTS users;`);
+    await sequelize.query(`DROP TABLE IF EXISTS citys;`);
 
     // Create users table
     await sequelize.query(`
@@ -17,12 +16,13 @@ const seedStoresDb = async () => {
 	email TEXT NOT NULL UNIQUE,
 	password TEXT NOT NULL,
 	is_admin BOOLEAN NOT NULL DEFAULT 0 CHECK (is_admin IN (0, 1))
+  )
      `);
 
     await sequelize.query(`
       CREATE TABLE IF NOT EXISTS citys (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    city_name TEXT NOT NULL,
+    city_name TEXT NOT NULL
     )
     `);
 
@@ -35,7 +35,8 @@ const seedStoresDb = async () => {
         fk_citys_id INTEGER NOT NULL, 
         fk_users_id INTEGER NOT NULL,
         FOREIGN KEY(fk_citys_id) REFERENCES citys(id),
-        FOREIGN KEY(fk_users_id) REFERENCES users(id)
+        FOREIGN KEY(fk_users_id) REFERENCES users(id),
+        description TEXT NOT NULL 
     )
       `);
 
@@ -60,23 +61,25 @@ const seedStoresDb = async () => {
     const passwordUser2 = "userPassword456";
     const passwordUser3 = "userPassword789";
 
-    const newPasswordAdmin = createHashedPassword(passwordAdmin);
-    const newPasswordKsenia = createHashedPassword(passwordKsenia);
-    const newPasswordPetra = createHashedPassword(passwordPetra);
-    const newPasswordHazan = createHashedPassword(passwordHazan);
-    const newUserPassword1 = createHashedPassword(passwordUser1);
-    const newUserPassword2 = createHashedPassword(passwordUser2);
-    const newUserPassword3 = createHashedPassword(passwordUser3);
+    const newPasswordAdmin = await createHashedPassword(passwordAdmin);
+    const newPasswordKsenia = await createHashedPassword(passwordKsenia);
+    const newPasswordPetra = await createHashedPassword(passwordPetra);
+    const newPasswordHazan = await createHashedPassword(passwordHazan);
+    const newUserPassword1 = await createHashedPassword(passwordUser1);
+    const newUserPassword2 = await createHashedPassword(passwordUser2);
+    const newUserPassword3 = await createHashedPassword(passwordUser3);
+
+    console.log(newPasswordHazan);
 
     await sequelize.query(
       `INSERT INTO users (email, password, is_admin) VALUES 
-      ('testus@gmail.com',${newPasswordAdmin}, 1), 
-      ('ksenia.ivanova@gmail.com',${newPasswordKsenia},0), 
-      ('petra.elgemyr@gmail.com',${newPasswordPetra},0), 
-      ('hazan@gmail.com',${newPasswordHazan},0)
-      ('user1@gmail.com',${newUserPassword1},0)
-      ('user2@gmail.com',${newUserPassword2},0)
-      ('user3@gmail.com',${newUserPassword3},0)`
+      ('testus@gmail.com','${newPasswordAdmin}', 1), 
+      ('ksenia.ivanova@gmail.com','${newPasswordKsenia}',0), 
+      ('petra.elgemyr@gmail.com','${newPasswordPetra}',0), 
+      ('hazan@gmail.com','${newPasswordHazan}',0),
+      ('user1@gmail.com','${newUserPassword1}',0),
+      ('user2@gmail.com','${newUserPassword2}',0),
+      ('user3@gmail.com','${newUserPassword3}',0)`
     );
 
     await sequelize.query(
@@ -87,15 +90,15 @@ const seedStoresDb = async () => {
     (store_name, address, fk_citys_id, fk_users_id, description) 
     VALUES 
     ('Ica Supermarket Alvikstorg', 'Gustavslundsvägen 22', (SELECT id FROM citys c WHERE city_name = 'Stockholm'), (SELECT id FROM users WHERE email = 'hazan@gmail.com'), 'Vardag eller fest? Vi har det du behöver. I butiken fyller vi varje dag på med nya färskvaror, frukt och grönt, mejeriprodukter och annat gott som förgyller din matvardag. I vår charkavdelning hittar du ostar, salami och skinkor för picknick, mys eller fest. Vi ses i butiken!'),
-    ('Lidl Göteborg', 'Kungsgatan 16', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'ksenia.ivanova@gmail.com'), 'Vi pressar ner priserna utan att kvalitén ska ta stryk. För oss är det viktigt att bidra till hållbar och ansvarsfull odling av råvaror. Därför satsar vi bland annat på vårt ekologiska sortiment som fortsätter att växa. Vi har idag närmare 200 egna ekologiska varor och det kommer bara bli fler. Välkommen in till oss!',
+    ('Lidl Göteborg', 'Kungsgatan 16', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'ksenia.ivanova@gmail.com'), 'Vi pressar ner priserna utan att kvalitén ska ta stryk. För oss är det viktigt att bidra till hållbar och ansvarsfull odling av råvaror. Därför satsar vi bland annat på vårt ekologiska sortiment som fortsätter att växa. Välkommen in till oss!'),
     ('Lidl Medborgarplatsen', 'Folkungagatan 51', (SELECT id FROM citys c WHERE city_name = 'Stockholm'), (SELECT id FROM users WHERE email = 'hazan@gmail.com'),'En stor butik på liten yta mitt på Södermalm. Lidl Medborgarplatsen strävar efter att vara ett av de billigaste alternativen på marknaden utan att förlora kvalitet.'), 
-    ('Coop Hötorget', 'T-station Hötorget', (SELECT id FROM citys c WHERE city_name = 'Stockholm'),(SELECT id FROM users WHERE email = 'hazan@gmail.com'), 'Coop Hötorget har stort utbud av allt som kan behövas. Mitt i Stockholm ligger vi med fokus på att det ska vara enkelt att snabbt handla hos oss påväg hem från jobbet utan något krångel. Välkommen in hos oss! '), 
-    ('ICA Supermarket Majorna','Karl Johansgatan 21', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com'), 'Ica är butiken där du kan handla mat av högsta kvalitet till bästa pris. Vi har flera hundra butiker i Sverige där svenska och ekologiska produkter samsas med utvalda utländska delikatesser.  '),
-    ('Stora Coop Stadion','Stadiongatan 24', (SELECT id FROM citys c WHERE city_name = 'Malmö'), (SELECT id FROM users WHERE email = 'hazan@gmail.com'),'Coop har alltid fokus på hållbar ekologisk mat till ett bra pris, utan att minska kvaliten.'),
-    ('Ica Supermarket Hansa',' Stora Nygatan', (SELECT id FROM citys c WHERE city_name = 'Malmö'), (SELECT id FROM users WHERE email = 'ksenia.ivanova@gmail.com'),'Ica Hansa, närbutik lagom nära och enkelt att hitta hit.'),
-    ('Hemköp Triangeln',' Södra Förstadsgatan 58',(SELECT id FROM citys c WHERE city_name = 'Malmö') , (SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com'),'Mitt i köpcentrumet ligger vi. Hjärtat av Malmö, välkommen hit!'), 
-    ('ICA Supermarket Olskroken',' Redbergsvägen 14', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com'),'Ica Olskroken finns när du behöver och där du behöver. Vardag eller helg så har vi det du söker.'),
-    ('Coop Mölndalsvägen','Mölndalsvägen 1', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'ksenia.ivanova@gmail.com'), 'En välsorterad butik med matbar och deli.')`);
+    ('Coop Hötorget', 'T-station Hötorget', (SELECT id FROM citys c WHERE city_name = 'Stockholm'),(SELECT id FROM users WHERE email = 'hazan@gmail.com'), 'Coop Hötorget har stort utbud av allt som kan behövas. Mitt i Stockholm ligger vi med fokus på att det ska vara enkelt att snabbt handla hos oss påväg hem från jobbet utan något krångel. Välkommen in hos oss!'), 
+    ('ICA Supermarket Majorna', 'Karl Johansgatan 21', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com'), 'Ica är butiken där du kan handla mat av högsta kvalitet till bästa pris. Vi har flera hundra butiker i Sverige där svenska och ekologiska produkter samsas med utvalda utländska delikatesser.'),
+    ('Stora Coop Stadion', 'Stadiongatan 24', (SELECT id FROM citys c WHERE city_name = 'Malmö'), (SELECT id FROM users WHERE email = 'hazan@gmail.com'),'Coop har alltid fokus på hållbar ekologisk mat till ett bra pris, utan att minska kvaliten.'),
+    ('Ica Supermarket Hansa', 'Stora Nygatan', (SELECT id FROM citys c WHERE city_name = 'Malmö'), (SELECT id FROM users WHERE email = 'ksenia.ivanova@gmail.com'),'Ica Hansa, närbutik lagom nära och enkelt att hitta hit.'),
+    ('Hemköp Triangeln', 'Södra Förstadsgatan 58',(SELECT id FROM citys c WHERE city_name = 'Malmö') , (SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com'),'Mitt i köpcentrumet ligger vi. Hjärtat av Malmö, välkommen hit!'), 
+    ('ICA Supermarket Olskroken', 'Redbergsvägen 14', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com'),'Ica Olskroken finns när du behöver och där du behöver. Vardag eller helg så har vi det du söker.'),
+    ('Coop Mölndalsvägen', 'Mölndalsvägen 1', (SELECT id FROM citys c WHERE city_name = 'Göteborg'), (SELECT id FROM users WHERE email = 'ksenia.ivanova@gmail.com'), 'En välsorterad butik med matbar och deli.')`);
 
     await sequelize.query(`INSERT INTO reviews (review_content, rating, fk_stores_id, fk_users_id) VALUES 
     ('Coop är en av de större matbutikerna och har ett stort utbud av matvaror. Jag gillar deras sortiment av ekologiska och hälsosamma produkter, och också deras fokus på hållbarhet.', 4, (SELECT id FROM stores WHERE store_name = 'Coop Hötorget'),(SELECT id FROM users WHERE email = 'petra.elgemyr@gmail.com')),
@@ -118,11 +121,6 @@ const seedStoresDb = async () => {
     ('Få kassor så det är alltid kö här tyvärr', 3, (SELECT id FROM stores WHERE store_name = 'ICA Supermarket Olskroken'),(SELECT id FROM users WHERE email = 'user1@gmail.com')),
     ('Jag gillar deras veckans erbjudande!', 4, (SELECT id FROM stores WHERE store_name = 'Coop Mölndalsvägen'),(SELECT id FROM users WHERE email = 'user2@gmail.com')),
     ('Jag uppskattar deras sortiment av färskvaror och deras lokala produkter', 4, (SELECT id FROM stores WHERE store_name = 'Coop Mölndalsvägen'),(SELECT id FROM users WHERE email = 'user3@gmail.com')),
-
-
-
-
-
 
 `);
 

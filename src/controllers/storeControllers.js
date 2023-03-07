@@ -14,7 +14,10 @@ const { QueryTypes } = require("sequelize");
 const jwt = require("jsonwebtoken");
 
 exports.getAllStores = async (req, res) => {
-  const [stores, metadata] = await sequelize.query("SELECT * FROM stores s ");
+  req.query;
+  const [stores, metadata] = await sequelize.query(
+    "SELECT * FROM stores s LIMIT 10 "
+  );
   return res.json(stores);
 };
 
@@ -189,7 +192,6 @@ exports.getAllStoresByCityId = async (req, res) => {
       bind: {
         cityId: cityId,
       },
-      type: QueryTypes.SELECT, // returns ID of created row
     }
   );
 
