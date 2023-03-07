@@ -9,8 +9,7 @@ Express server
 
 ### Preparations
 
-DbDiagram
-![DbDiagram](./Assignment.png, "DbDiagram")
+![DbDiagram](./src/assets/Assignment.png)
 
 ### Users
 
