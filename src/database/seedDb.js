@@ -32,7 +32,7 @@ const seedStoresDb = async () => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         store_name TEXT NOT NULL,
         address TEXT NOT NULL,
-        description TEXT NOT NULL,
+        description TEXT,
         fk_citys_id INTEGER NOT NULL, 
         fk_users_id INTEGER,
         FOREIGN KEY(fk_citys_id) REFERENCES citys(id),

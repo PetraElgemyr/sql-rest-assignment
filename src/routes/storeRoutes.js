@@ -10,6 +10,11 @@ const {
   deleteStoreById,
 } = require("../controllers/storeControllers");
 const { getAllReviewsByStoreId } = require("../controllers/reviewControllers");
+const { validate } = require("../middleware/validation/validationMiddleware");
+const {
+  storeSchema,
+  reviewSchema,
+} = require("../middleware/validation/validationSchemas");
 
 //(getAllStores)
 router.get("/", getAllStores);
@@ -20,13 +25,23 @@ router.get("/:storeId", getStoreById);
 router.get("/:storeId/reviews", getAllReviewsByStoreId);
 
 //addNewStore inloggad för
-router.post("/", isAuthenticated, addNewStore);
+router.post("/", isAuthenticated, validate(storeSchema), addNewStore);
 
 //createNewReviewForStore   http://localhost:3000/api/v1/stores/:storeId/reviews
-router.post("/:storeId/reviews", isAuthenticated, createNewReviewForStoreById);
+router.post(
+  "/:storeId/reviews",
+  isAuthenticated,
+  validate(reviewSchema),
+  createNewReviewForStoreById
+);
 
 //updateStoreById ägare/admin
-router.put("/:storeId", isAuthenticated, updateStoreById);
+router.put(
+  "/:storeId",
+  isAuthenticated,
+  validate(storeSchema),
+  updateStoreById
+);
 
 //deleteStoreById ägare /admin
 router.delete("/:storeId", isAuthenticated, deleteStoreById);
