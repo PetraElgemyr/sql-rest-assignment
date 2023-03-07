@@ -8,14 +8,16 @@ const {
   createNewReviewForStoreById,
   updateStoreById,
   deleteStoreById,
-  getAllStoresByCityId,
 } = require("../controllers/storeControllers");
+const { getAllReviewsByStoreId } = require("../controllers/reviewControllers");
 
 //(getAllStores)
 router.get("/", getAllStores);
 
 //getStoreById
 router.get("/:storeId", getStoreById);
+
+router.get("/:storeId/reviews", getAllReviewsByStoreId);
 
 //addNewStore inloggad för
 router.post("/", isAuthenticated, addNewStore);

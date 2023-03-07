@@ -14,9 +14,17 @@ const { QueryTypes } = require("sequelize");
 const jwt = require("jsonwebtoken");
 
 exports.getAllStores = async (req, res) => {
-  req.query;
+  const offset = req.query.offset;
+  const limit = req.query.limit;
+
   const [stores, metadata] = await sequelize.query(
-    "SELECT * FROM stores s LIMIT 10 "
+    "SELECT * FROM stores s LIMIT $limit OFFSET $offset",
+    {
+      bind: {
+        offset: offset,
+        limit: limit,
+      },
+    }
   );
   return res.json(stores);
 };
@@ -42,15 +50,16 @@ exports.getStoreById = async (req, res) => {
 };
 
 exports.addNewStore = async (req, res) => {
-  const { storeName, givenAddress, cityId } = req.body;
+  const { storeName, givenAddress, description, cityId } = req.body;
 
   //fk_user_id is automatically the userId from the token user
   const [newStoreId] = await sequelize.query(
-    "INSERT INTO stores (store_name, address, fk_citys_id, fk_users_id) VALUES ($storeName, $givenAddress, $cityId, $userId);",
+    "INSERT INTO stores (store_name, address, description, fk_citys_id, fk_users_id) VALUES ($storeName, $givenAddress, $description, $cityId, $userId);",
     {
       bind: {
         storeName: storeName,
         givenAddress: givenAddress,
+        description: description,
         cityId: cityId,
         userId: req.user.userId,
       },
@@ -99,7 +108,6 @@ exports.updateStoreById = async (req, res) => {
       bind: {
         storeId,
       },
-      type: QueryTypes.SELECT,
     }
   );
 
@@ -108,7 +116,7 @@ exports.updateStoreById = async (req, res) => {
   }
 
   if (
-    storeToUpdate.fk_users_id !== loggedInUserId &&
+    storeToUpdate[0].fk_users_id !== loggedInUserId &&
     req.user.role !== userRoles.ADMIN
   ) {
     throw new UnauthorizedError(
@@ -143,7 +151,6 @@ exports.deleteStoreById = async (req, res) => {
       bind: {
         storeId: storeId,
       },
-      type: QueryTypes.SELECT,
     }
   );
 
@@ -153,7 +160,7 @@ exports.deleteStoreById = async (req, res) => {
 
   // //om både owner=false och admin=false
   if (
-    store.fk_users_id !== loggedInUserId &&
+    store[0].fk_users_id !== loggedInUserId &&
     req.user.role !== userRoles.ADMIN
   ) {
     throw new UnauthorizedError(
@@ -185,12 +192,16 @@ exports.deleteStoreById = async (req, res) => {
 
 exports.getAllStoresByCityId = async (req, res) => {
   const cityId = req.params.cityId;
+  const offset = req.query.offset;
+  const limit = req.query.limit;
 
   const [stores, metadata] = await sequelize.query(
-    "SELECT * FROM stores s WHERE fk_citys_id = $cityId",
+    "SELECT * FROM stores s WHERE fk_citys_id = $cityId LIMIT $limit OFFSET $offset",
     {
       bind: {
         cityId: cityId,
+        limit: limit,
+        offset: offset,
       },
     }
   );

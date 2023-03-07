@@ -4,13 +4,24 @@ const { sequelize } = require("../database/config");
 const { QueryTypes } = require("sequelize");
 
 exports.getAllUsers = async (req, res) => {
+  const offset = req.query.offset;
+  const limit = req.query.limit;
+
   if (req.user.role !== userRoles.ADMIN) {
     throw new UnauthorizedError(
       "Unauthorized Access! Only admins can do that!"
     );
   }
   if (req.user.role === userRoles.ADMIN) {
-    const [users, metadata] = await sequelize.query(`SELECT * FROM users u`);
+    const [users, metadata] = await sequelize.query(
+      "SELECT * FROM users u LIMIT $limit OFFSET $offset",
+      {
+        bind: {
+          offset: offset,
+          limit: limit,
+        },
+      }
+    );
 
     return res.json(users);
   }
@@ -20,43 +31,66 @@ exports.getUserById = async (req, res) => {
   const userId = req.params.userId;
 
   const [users, metadata] = await sequelize.query(
-    "SELECT id, email, password FROM users u WHERE id = $userId",
+    "SELECT id, email FROM users u WHERE id = $userId",
     {
-      bind: { userId: userId},
+      bind: { userId: userId },
       type: QueryTypes.SELECT,
-
-    });
-
-    if (!users) {
-      throw new NotFoundError("We could not find this user");
     }
-    return res.json(users)
+  );
 
-
+  if (!users) {
+    throw new NotFoundError("We could not find this user");
+  }
+  return res.json(users);
 };
-
 
 exports.deleteUserById = async (req, res) => {
   // Grab the user id and place in local variable
   const givenUserId = req.params.userId;
 
-  // Check if user is admin || user is requesting to delete themselves
-  if (givenUserId != req.user?.userId && req.user.role !== userRoles.ADMIN) {
-    throw new UnauthorizedError("Unauthorized Access");
-  }
-
-  // Delete the user from the database
-  const [results, metadata] = await sequelize.query(
-    "DELETE FROM users WHERE id = $givenUserId RETURNING *",
+  const [userExists, metadata] = await sequelize.query(
+    "SELECT * FROM users WHERE id = $givenUserId LIMIT 1 ",
     {
       bind: { givenUserId },
     }
   );
 
-  // Not found error (ok since since route is authenticated)
-  if (!results || !results[0])
+  if (!userExists[0]) {
     throw new NotFoundError("That user does not exist");
+  }
 
-  // Send back user info
+  if (
+    userExists[0].id !== req.user?.userId &&
+    req.user.role !== userRoles.ADMIN
+  ) {
+    throw new UnauthorizedError("Unauthorized access to delete user");
+  }
+
+  // if (
+  //   userExists[0].id === req.user.userId ||
+  //   req.user.role === userRoles.ADMIN
+  // ) {
+  //deleta reviews av usern
+  await sequelize.query(
+    "DELETE FROM reviews WHERE fk_users_id = $givenUserId",
+    {
+      bind: { givenUserId },
+    }
+  );
+
+  //ändra äganderätten på userns butiker till NULL
+  await sequelize.query(
+    "UPDATE stores SET fk_users_id = NULL WHERE fk_users_id = $givenUserId",
+    {
+      bind: { givenUserId },
+    }
+  );
+
+  //deleta usern sist av allt
+  await sequelize.query("DELETE FROM users WHERE id = $givenUserId", {
+    bind: { givenUserId },
+  });
+
   return res.sendStatus(204);
+  // }
 };

@@ -7,63 +7,21 @@ const { userRoles } = require("../constants/users");
 
 exports.register = async (req, res) => {
   // Place desired username, email and password into local variables
-  const { password, email, isAdmin } = req.body;
+  const { password, email } = req.body;
 
   // Encrypt the desired password
   const salt = await bcrypt.genSalt(10);
   const hashedpassword = await bcrypt.hash(password, salt);
 
-  if (isAdmin) {
-    await sequelize.query(
-      "INSERT INTO users(email, password, is_admin) VALUES($email, $password, TRUE)",
-      {
-        bind: {
-          password: hashedpassword,
-          email: email,
-        },
-      }
-    );
-  }
-  if (!isAdmin) {
-    await sequelize.query(
-      "INSERT INTO users (email, password, is_admin) VALUES ($email, $password, FALSE)",
-      {
-        bind: {
-          password: hashedpassword,
-          email: email,
-        },
-      }
-    );
-  }
-
-  // Check if there are users in the database
-  // const [results, metadata] = await sequelize.query(
-  //   "SELECT id FROM users LIMIT 1"
-  // );
-  // // Add user to database (make admin if first user)
-  // if (!results || results.length < 1) {
-  //   // prettier-ignore
-  //   await sequelize.query(
-  // 		'INSERT INTO users(email, password, is_admin) VALUES($email, $password, TRUE)',
-  // 		{
-  // 			bind: {
-  // 				password: hashedpassword,
-  // 				email: email
-  // 			}
-  // 		}
-  // 	)
-  // } else {
-  //   // prettier-ignore
-  //   await sequelize.query(
-  // 		'INSERT INTO users (email, password, is_admin) VALUES ($email, $password, FALSE)',
-  // 		{
-  // 			bind: {
-  // 				password: hashedpassword,
-  // 				email: email,
-  // 			},
-  // 		}
-  // 	)
-  // }
+  await sequelize.query(
+    "INSERT INTO users (email, password, is_admin) VALUES ($email, $password, FALSE)",
+    {
+      bind: {
+        password: hashedpassword,
+        email: email,
+      },
+    }
+  );
 
   // Request response
   return res.status(201).json({

@@ -34,7 +34,7 @@ const seedStoresDb = async () => {
         address TEXT NOT NULL,
         description TEXT NOT NULL,
         fk_citys_id INTEGER NOT NULL, 
-        fk_users_id INTEGER NOT NULL,
+        fk_users_id INTEGER,
         FOREIGN KEY(fk_citys_id) REFERENCES citys(id),
         FOREIGN KEY(fk_users_id) REFERENCES users(id)
         )

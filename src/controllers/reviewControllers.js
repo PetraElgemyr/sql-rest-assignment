@@ -2,6 +2,7 @@ const { userRoles } = require("../constants/users");
 const { sequelize } = require("../database/config");
 const { UnauthorizedError, NotFoundError } = require("../utils/errors");
 const { QueryTypes } = require("sequelize");
+const { log } = require("console");
 
 exports.getReviewById = async (req, res) => {
   // Grab the review id and place in local variable
@@ -35,7 +36,7 @@ exports.deleteReviewById = async (req, res) => {
   const givenReviewId = req.params.reviewId;
   // Grab the logged in user id and place in local variable
   const loggedInUserId = req.user.userId;
-  
+
   const [review, metadata] = await sequelize.query(
     "SELECT * FROM reviews WHERE id = $givenReviewId",
     {
@@ -44,47 +45,73 @@ exports.deleteReviewById = async (req, res) => {
     }
   );
 
-   
   //check if review exists
-  if (!review) throw new NotFoundError("There is no such review")
- 
-  
-  // Check if review belongs to logged-in user 
-  if (review.fk_users_id !== loggedInUserId && req.user.role !== userRoles.ADMIN) {
+  if (!review) throw new NotFoundError("There is no such review");
+
+  // Check if review belongs to logged-in user
+  if (
+    review.fk_users_id !== loggedInUserId &&
+    req.user.role !== userRoles.ADMIN
+  ) {
     throw new UnauthorizedError("You can't delete this review!");
   }
 
-   
   // Delete the review from the database
   await sequelize.query(
     "DELETE FROM reviews WHERE id = $givenReviewId",
-    
+
     {
       bind: {
-        givenReviewId
+        givenReviewId,
       },
       type: QueryTypes.DELETE,
     }
   );
 
-   
   return res.sendStatus(204);
- 
 };
-
 
 exports.getAllReviewsByUserId = async (req, res) => {
   const userId = req.params.userId;
+  const offset = req.query.offset;
+  const limit = req.query.limit;
+
   const [reviews, metadata] = await sequelize.query(
-    "SELECT * FROM reviews r WHERE fk_users_id = $userId",
+    "SELECT * FROM reviews r WHERE fk_users_id = $userId LIMIT $limit OFFSET $offset",
     {
-      bind: { userId },
-      type: QueryTypes.SELECT,
+      bind: {
+        userId: userId,
+        offset: offset,
+        limit: limit,
+      },
     }
   );
 
   if (!reviews) {
     throw new NotFoundError("We could not find any reviews by this user");
   }
+  return res.json(reviews);
+};
+
+exports.getAllReviewsByStoreId = async (req, res) => {
+  const storeId = req.params.storeId;
+  const offset = req.query.offset;
+  const limit = req.query.limit;
+
+  const [reviews, metadata] = await sequelize.query(
+    "SELECT * FROM reviews r WHERE fk_stores_id = $storeId LIMIT $limit OFFSET $offset",
+    {
+      bind: {
+        storeId: storeId,
+        offset: offset,
+        limit: limit,
+      },
+    }
+  );
+
+  if (!reviews) {
+    throw new NotFoundError("We could not find any reviews by this user");
+  }
+
   return res.json(reviews);
 };

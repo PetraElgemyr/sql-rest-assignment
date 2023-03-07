@@ -12,7 +12,7 @@ const { getAllReviewsByUserId } = require("../controllers/reviewControllers");
 router.get("/", isAuthenticated, getAllUsers);
 
 //getUserById
-router.get("/:userId", isAuthenticated, getUserById);
+router.get("/:userId", getUserById);
 
 //deleteUserById
 router.delete("/:userId", isAuthenticated, deleteUserById);
