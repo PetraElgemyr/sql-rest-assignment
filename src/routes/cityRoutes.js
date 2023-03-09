@@ -5,6 +5,6 @@ const router = express.Router();
 const { getAllStoresByCityId } = require("../controllers/storeControllers");
 
 //getAllStoresByCityId  /api/v1/citys/stores/:cityId
-router.get("/stores/:cityId", getAllStoresByCityId);
+router.get("/:cityId/stores", getAllStoresByCityId);
 
 module.exports = router;
