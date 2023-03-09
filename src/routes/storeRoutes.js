@@ -16,18 +16,14 @@ const {
   reviewSchema,
 } = require("../middleware/validation/validationSchemas");
 
-//(getAllStores)
 router.get("/", getAllStores);
 
-//getStoreById
 router.get("/:storeId", getStoreById);
 
 router.get("/:storeId/reviews", getAllReviewsByStoreId);
 
-//addNewStore inloggad för
 router.post("/", isAuthenticated, validate(storeSchema), addNewStore);
 
-//createNewReviewForStore   http://localhost:3000/api/v1/stores/:storeId/reviews
 router.post(
   "/:storeId/reviews",
   isAuthenticated,
@@ -35,7 +31,6 @@ router.post(
   createNewReviewForStoreById
 );
 
-//updateStoreById ägare/admin
 router.put(
   "/:storeId",
   isAuthenticated,
@@ -43,7 +38,6 @@ router.put(
   updateStoreById
 );
 
-//deleteStoreById ägare /admin
 router.delete("/:storeId", isAuthenticated, deleteStoreById);
 
 module.exports = router;

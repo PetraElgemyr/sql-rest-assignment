@@ -52,7 +52,6 @@ exports.getStoreById = async (req, res) => {
 exports.addNewStore = async (req, res) => {
   const { storeName, givenAddress, description, cityId } = req.body;
 
-  //fk_user_id is automatically the userId from the token user
   const [newStoreId] = await sequelize.query(
     "INSERT INTO stores (store_name, address, description, fk_citys_id, fk_users_id) VALUES ($storeName, $givenAddress, $description, $cityId, $userId);",
     {
@@ -63,14 +62,16 @@ exports.addNewStore = async (req, res) => {
         cityId: cityId,
         userId: req.user.userId,
       },
-      type: QueryTypes.INSERT, // returns ID of created row
+      type: QueryTypes.INSERT,
     }
   );
 
-  // prettier-ignore
   return res
-    .setHeader('Location', `${req.protocol}://${req.headers.host}/api/v1/stores/${newStoreId}`)
-    .sendStatus(201)
+    .setHeader(
+      "Location",
+      `${req.protocol}://${req.headers.host}/api/v1/stores/${newStoreId}`
+    )
+    .sendStatus(201);
 };
 
 exports.createNewReviewForStoreById = async (req, res) => {
@@ -87,14 +88,16 @@ exports.createNewReviewForStoreById = async (req, res) => {
         storeId: storeId,
         userId: userId,
       },
-      type: QueryTypes.INSERT, // returns ID of created row
+      type: QueryTypes.INSERT,
     }
   );
 
-  // prettier-ignore
   return res
-    .setHeader('Location', `${req.protocol}://${req.headers.host}/api/v1/stores/${newReviewId}`)
-    .sendStatus(201)
+    .setHeader(
+      "Location",
+      `${req.protocol}://${req.headers.host}/api/v1/stores/${newReviewId}`
+    )
+    .sendStatus(201);
 };
 
 exports.updateStoreById = async (req, res) => {
@@ -158,7 +161,6 @@ exports.deleteStoreById = async (req, res) => {
     throw new NotFoundError("We could not find the store you are looking for");
   }
 
-  // //om både owner=false och admin=false
   if (
     store[0].fk_users_id !== loggedInUserId &&
     req.user.role !== userRoles.ADMIN

@@ -45,7 +45,6 @@ exports.getUserById = async (req, res) => {
 };
 
 exports.deleteUserById = async (req, res) => {
-  // Grab the user id and place in local variable
   const givenUserId = req.params.userId;
 
   const [userExists, metadata] = await sequelize.query(
@@ -66,11 +65,6 @@ exports.deleteUserById = async (req, res) => {
     throw new UnauthorizedError("Unauthorized access to delete user");
   }
 
-  // if (
-  //   userExists[0].id === req.user.userId ||
-  //   req.user.role === userRoles.ADMIN
-  // ) {
-  //deleta reviews av usern
   await sequelize.query(
     "DELETE FROM reviews WHERE fk_users_id = $givenUserId",
     {
@@ -78,7 +72,6 @@ exports.deleteUserById = async (req, res) => {
     }
   );
 
-  //ändra äganderätten på userns butiker till NULL
   await sequelize.query(
     "UPDATE stores SET fk_users_id = NULL WHERE fk_users_id = $givenUserId",
     {
@@ -86,11 +79,9 @@ exports.deleteUserById = async (req, res) => {
     }
   );
 
-  //deleta usern sist av allt
   await sequelize.query("DELETE FROM users WHERE id = $givenUserId", {
     bind: { givenUserId },
   });
 
   return res.sendStatus(204);
-  // }
 };

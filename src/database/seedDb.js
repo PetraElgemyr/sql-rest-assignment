@@ -3,13 +3,11 @@ const bcrypt = require("bcrypt");
 
 const seedStoresDb = async () => {
   try {
-    // Drop tables if exist
     await sequelize.query(`DROP TABLE IF EXISTS reviews;`);
     await sequelize.query(`DROP TABLE IF EXISTS stores;`);
     await sequelize.query(`DROP TABLE IF EXISTS users;`);
     await sequelize.query(`DROP TABLE IF EXISTS citys;`);
 
-    // Create users table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS users (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +24,6 @@ const seedStoresDb = async () => {
     )
     `);
 
-    // Create stores table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS stores (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,7 +37,6 @@ const seedStoresDb = async () => {
         )
       `);
 
-    // Create reviews table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS reviews (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -126,10 +122,8 @@ const seedStoresDb = async () => {
 
     console.log("Database successfully populated with data");
   } catch (error) {
-    // Log eny eventual errors to Terminal
     console.error(error);
   } finally {
-    // End Node process
     process.exit(0);
   }
 };
