@@ -13,6 +13,8 @@ Our dbDiagram
 
 ![DbDiagram](./src/assets/Assignment.png)
 
+Populate data with seedDb. Use command npm run seedDB
+
 ### Users
 
 Email: testus@gmail.com, password: "testar123" (admin)
